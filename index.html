@@ -73,13 +73,7 @@
       pointer-events: none;
     }
     .hero-bg-grid {
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
-      pointer-events: none;
+      display: none;
     }
     .hero-badge {
       display: inline-block;
@@ -152,18 +146,10 @@
       50% { transform: translateX(-50%) translateY(8px); }
     }
 
-    .mc-float {
+    .fireball {
       position: absolute;
-      font-size: 2rem;
-      opacity: 0.08;
       pointer-events: none;
-      animation: floatUp linear infinite;
-    }
-    @keyframes floatUp {
-      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-      10% { opacity: 0.08; }
-      90% { opacity: 0.08; }
-      100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+      opacity: 0.7;
     }
 
     section {
@@ -305,17 +291,11 @@
 
 <section class="hero">
   <div class="hero-bg-grid"></div>
-  <span class="mc-float" style="left:5%; font-size:2.5rem; animation-duration:18s; animation-delay:0s;">🟩</span>
-  <span class="mc-float" style="left:15%; font-size:1.8rem; animation-duration:22s; animation-delay:2s;">⛏️</span>
-  <span class="mc-float" style="left:28%; font-size:2rem; animation-duration:20s; animation-delay:4s;">⬛</span>
-  <span class="mc-float" style="left:40%; font-size:2.2rem; animation-duration:25s; animation-delay:1s;">🪓</span>
-  <span class="mc-float" style="left:55%; font-size:1.6rem; animation-duration:19s; animation-delay:3s;">🟧</span>
-  <span class="mc-float" style="left:68%; font-size:2.4rem; animation-duration:23s; animation-delay:5s;">⚔️</span>
-  <span class="mc-float" style="left:78%; font-size:1.9rem; animation-duration:21s; animation-delay:0.5s;">🟫</span>
-  <span class="mc-float" style="left:88%; font-size:2.1rem; animation-duration:17s; animation-delay:6s;">💎</span>
-  <span class="mc-float" style="left:95%; font-size:1.7rem; animation-duration:24s; animation-delay:2.5s;">🛡️</span>
-  <span class="mc-float" style="left:35%; font-size:2rem; animation-duration:20s; animation-delay:7s;">🟦</span>
-  <span class="mc-float" style="left:50%; font-size:1.5rem; animation-duration:26s; animation-delay:4.5s;">🔥</span>
+  <img class="fireball" src="fireballs/fireball_side_small.gif" alt="">
+  <img class="fireball" src="fireballs/fire_ball_blue_side_small.gif" alt="">
+  <img class="fireball" src="fireballs/fireball_side_medium.gif" alt="">
+  <img class="fireball" src="fireballs/fireball_high_speed_side_small.gif" alt="">
+  <img class="fireball" src="fireballs/meteor_side_medium.gif" alt="">
   <div class="hero-badge">✦ 26.2 / Java</div>
   <h1>Your <span>Adventure</span><br>Awaits</h1>
   <p>A unique Minecraft experience with custom features, friendly community, and endless possibilities.</p>
@@ -432,10 +412,50 @@ function copyIP() {
 
 let count = 0;
 const el = document.getElementById('playerCount');
-setInterval(() => {
-  count = Math.floor(Math.random() * 50) + 5;
-  el.textContent = count;
-}, 5000);
+async function fetchPlayers() {
+  try {
+    const res = await fetch('https://api.mcsrvstat.us/3/organization-undusted.gl.joinmc.link');
+    const data = await res.json();
+    if (data.online) {
+      count = data.players.online;
+      el.textContent = count;
+    } else {
+      el.textContent = '0';
+    }
+  } catch (e) {
+    el.textContent = '?';
+  }
+}
+fetchPlayers();
+setInterval(fetchPlayers, 30000);
+
+const fireballs = document.querySelectorAll('.fireball');
+const sizes = [40, 55, 70, 50, 65];
+
+fireballs.forEach((fb, i) => {
+  fb.style.width = sizes[i] + 'px';
+  fb.style.position = 'absolute';
+  fb.style.zIndex = '0';
+
+  let x = Math.random() * window.innerWidth;
+  let y = Math.random() * window.innerHeight;
+  let vx = (Math.random() - 0.5) * 2;
+  let vy = (Math.random() - 0.5) * 2;
+
+  function move() {
+    x += vx;
+    y += vy;
+    if (x < -80) x = window.innerWidth + 80;
+    if (x > window.innerWidth + 80) x = -80;
+    if (y < -80) y = window.innerHeight + 80;
+    if (y > window.innerHeight + 80) y = -80;
+    fb.style.left = x + 'px';
+    fb.style.top = y + 'px';
+    fb.style.transform = 'rotate(' + Math.atan2(vy, vx) * 180 / Math.PI + 'deg)';
+    requestAnimationFrame(move);
+  }
+  move();
+});
 </script>
 </body>
 </html>
